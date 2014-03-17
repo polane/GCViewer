@@ -19,14 +19,15 @@ public class GCViewer {
         if (args.length > 3) {
             usage();
         }
-        else if (args.length >= 2) {
+        else if (args.length >= 3) {
         	final String gcfile = args[0];
         	final String summaryFilePath = args[1];
-            final String chartFilePath = args.length == 3 ? args[2] : null;
+        	final String detailsFilePath = args[2];
+            final String chartFilePath = args.length == 4 ? args[3] : null;
 
             //export summary:
             try {
-                export(gcfile, summaryFilePath, chartFilePath);
+                export(gcfile, summaryFilePath, detailsFilePath, chartFilePath);
                 System.exit(0);
             }
             catch(Exception e) {
@@ -39,12 +40,13 @@ public class GCViewer {
         }
     }
 
-    private static void export(String gcFilename, String summaryFilePath, String chartFilePath)
+    private static void export(String gcFilename, String summaryFilePath, String detailsFilePath, String chartFilePath)
             throws IOException, DataReaderException {
         DataReaderFacade dataReaderFacade = new DataReaderFacade();
         GCModel model = dataReaderFacade.loadModel(gcFilename, false, null);
 
         exportSummary(model, summaryFilePath);
+        exportDetails(model, detailsFilePath);
         if (chartFilePath != null)
             renderChart(model, chartFilePath);
     }
@@ -52,6 +54,12 @@ public class GCViewer {
 	private static void exportSummary(GCModel model, String summaryFilePath) throws IOException {
         try (DataWriter summaryWriter = DataWriterFactory.getDataWriter(new File(summaryFilePath), DataWriterType.SUMMARY)) {
             summaryWriter.write(model);
+        }
+    }
+	
+	private static void exportDetails(GCModel model, String detailsFilePath) throws IOException {
+        try (DataWriter datailsyWriter = DataWriterFactory.getDataWriter(new File(detailsFilePath), DataWriterType.CSV)) {
+        	datailsyWriter.write(model);
         }
     }
 
@@ -63,9 +71,10 @@ public class GCViewer {
 	private static void usage() {
 		System.out.println("Welcome to GCViewer with cmdline");
         System.out.println("java -jar gcviewer.jar [<gc-log-file|url>] -> opens gui and loads given file");
-        System.out.println("java -jar gcviewer.jar [<gc-log-file>] [<export.csv>] -> cmdline: writes report to <export.csv>");
-        System.out.println("java -jar gcviewer.jar [<gc-log-file>] [<export.csv>] [<chart.png>] " +
-                "-> cmdline: writes report to <export.csv> and renders gc chart to <chart.png>");
+        System.out.println("java -jar gcviewer.jar [<gc-log-file>] [<summary-export.csv> <details-export.csv>] "+
+        		"-> cmdline: writes reports to <summary-export.csv> and details-export.csv");
+        System.out.println("java -jar gcviewer.jar [<gc-log-file>] [<summary-export.csv> <details-export.csv>] [<chart.png>] " +
+                "-> cmdline: writes reports to <summary-export.csv> and details-export.csv and renders gc chart to <chart.png>");
     }
 
 }

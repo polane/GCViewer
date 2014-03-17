@@ -121,6 +121,7 @@ public class DataReaderFacade {
      * @throws IOException problem reading the data
      */
     private GCModel readModel(URL url) throws IOException {
+    	LOGGER.info("Reading Model from : "+url); 
         DataReaderFactory factory = new DataReaderFactory();
     	final URLConnection conn = url.openConnection();    	
     	final InputStream in = conn instanceof HttpURLConnection
